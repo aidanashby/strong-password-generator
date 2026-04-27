@@ -40,6 +40,14 @@ class Strong_Password_Generator {
 		add_action( 'wp_ajax_nopriv_generate_passwords', [ $this, 'generate_passwords_callback' ] );
 		add_action( 'admin_menu',  [ $this, 'admin_menu' ] );
 		add_action( 'admin_init',  [ $this, 'admin_init' ] );
+		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), [ $this, 'plugin_action_links' ] );
+	}
+
+	public function plugin_action_links( array $links ): array {
+		$settings_link = '<a href="' . admin_url( 'options-general.php?page=strong-password-generator' ) . '">'
+			. esc_html__( 'Settings', 'strong-password-generator' ) . '</a>';
+		array_unshift( $links, $settings_link );
+		return $links;
 	}
 
 	// -------------------------------------------------------------------------
@@ -243,8 +251,8 @@ class Strong_Password_Generator {
 
 	public function admin_menu(): void {
 		add_options_page(
-			__( 'Password Generator Settings', 'strong-password-generator' ),
-			__( 'Password Generator', 'strong-password-generator' ),
+			__( 'Strong Password Generator Settings', 'strong-password-generator' ),
+			__( 'Strong Password Generator', 'strong-password-generator' ),
 			'manage_options',
 			'strong-password-generator',
 			[ $this, 'admin_page' ]
@@ -302,7 +310,7 @@ class Strong_Password_Generator {
 		$s = $this->get_settings();
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Password Generator Settings', 'strong-password-generator' ); ?></h1>
+			<h1><?php esc_html_e( 'Strong Password Generator Settings', 'strong-password-generator' ); ?></h1>
 			<form method="post" action="options.php">
 				<?php settings_fields( 'spg_settings_group' ); ?>
 
@@ -495,4 +503,7 @@ if ( file_exists( $spg_puc_path ) ) {
 	);
 	$spg_checker->setBranch( 'main' );
 	$spg_checker->getVcsApi()->enableReleaseAssets();
+	// Remove the "Check for updates" action link — updates surface through the
+	// standard WP update system (plugins list and /wp-admin/update-core.php).
+	add_filter( 'puc_manual_check_link-strong-password-generator', '__return_empty_string' );
 }
