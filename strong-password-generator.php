@@ -497,7 +497,7 @@ $spg_puc_path = plugin_dir_path( __FILE__ ) . 'includes/plugin-update-checker/pl
 if ( file_exists( $spg_puc_path ) ) {
 	require_once $spg_puc_path;
 	$spg_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
-		'https://github.com/YOUR-GITHUB-USERNAME/strong-password-generator/',
+		'https://github.com/aidanashby/strong-password-generator/',
 		__FILE__,
 		'strong-password-generator'
 	);
