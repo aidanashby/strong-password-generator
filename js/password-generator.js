@@ -1,85 +1,98 @@
-(function ($) {
-	$(document).ready(function () {
-		var generateBtn      = $('#generate-password-btn');
-		var resultsContainer = $('#password-results');
+(function () {
+	'use strict';
 
-		generateBtn.on('click', function () {
-			generateBtn.prop('disabled', true).attr('aria-busy', 'true');
-			resultsContainer.empty().append(
-				$('<p>').text(passwordGeneratorL10n.generating)
+	document.addEventListener('DOMContentLoaded', function () {
+		var generateBtn      = document.getElementById('generate-password-btn');
+		var resultsContainer = document.getElementById('password-results');
+
+		generateBtn.addEventListener('click', function () {
+			generateBtn.disabled = true;
+			generateBtn.setAttribute('aria-busy', 'true');
+			resultsContainer.innerHTML = '';
+			resultsContainer.appendChild(
+				createElement('p', {}, passwordGeneratorL10n.generating)
 			);
 
-			$.ajax({
-				url:  passwordGenerator.ajaxUrl,
-				type: 'POST',
-				data: {
-					action: 'generate_passwords',
-					nonce:  passwordGenerator.nonce,
-				},
-				success: function (response) {
+			var body = new URLSearchParams();
+			body.append('action', 'generate_passwords');
+			body.append('nonce', passwordGenerator.nonce);
+
+			fetch(passwordGenerator.ajaxUrl, {
+				method:  'POST',
+				headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+				body:    body.toString(),
+			})
+				.then(function (response) { return response.json(); })
+				.then(function (response) {
 					if (response.success && response.data) {
 						displayPasswords(response.data);
 					} else {
-						resultsContainer.empty().append(
-							$('<p>').text(passwordGeneratorL10n.error)
-						);
+						showError();
 					}
-				},
-				error: function () {
-					resultsContainer.empty().append(
-						$('<p>').text(passwordGeneratorL10n.error)
-					);
-				},
-				complete: function () {
-					generateBtn.prop('disabled', false).removeAttr('aria-busy');
-				},
-			});
+				})
+				.catch(showError)
+				.finally(function () {
+					generateBtn.disabled = false;
+					generateBtn.removeAttribute('aria-busy');
+				});
 		});
 
+		function showError() {
+			resultsContainer.innerHTML = '';
+			resultsContainer.appendChild(
+				createElement('p', {}, passwordGeneratorL10n.error)
+			);
+		}
+
 		function displayPasswords(passwords) {
-			var list = $('<ul>').addClass('password-list');
+			var list = createElement('ul', { className: 'password-list' });
 
 			passwords.forEach(function (password) {
-				var copyIcon  = $('<span>').addClass('copy-icon').text('\uD83D\uDCCB');
-				var checkIcon = $('<span>').addClass('check-icon').text('\u2713');
+				var copyIcon  = createElement('span', { className: 'copy-icon' }, '📋');
+				var checkIcon = createElement('span', { className: 'check-icon' }, '✓');
 
-				var copyBtn = $('<button>')
-					.addClass('copy-btn')
-					.attr('aria-label', passwordGeneratorL10n.copy)
-					.data('password', password)
-					.append(copyIcon, checkIcon);
-
-				var li = $('<li>').addClass('password-item').append(
-					$('<span>').addClass('password-text').text(password),
-					copyBtn
-				);
-
-				list.append(li);
-			});
-
-			resultsContainer.empty().append(list);
-
-			list.on('click', '.copy-btn', function () {
-				var btn      = $(this);
-				var password = btn.data('password');
-
-				navigator.clipboard.writeText(password).then(function () {
-					btn.find('.copy-icon').hide();
-					btn.find('.check-icon').show();
-					btn.attr('aria-label', passwordGeneratorL10n.copied);
-
-					setTimeout(function () {
-						btn.find('.check-icon').hide();
-						btn.find('.copy-icon').show();
-						btn.attr('aria-label', passwordGeneratorL10n.copy);
-					}, 2000);
-				}).catch(function () {
-					btn.find('.copy-icon').text('\u2717');
-					setTimeout(function () {
-						btn.find('.copy-icon').text('\uD83D\uDCCB');
-					}, 2000);
+				var copyBtn = createElement('button', {
+					className:  'copy-btn',
+					ariaLabel:  passwordGeneratorL10n.copy,
 				});
+				copyBtn.appendChild(copyIcon);
+				copyBtn.appendChild(checkIcon);
+
+				copyBtn.addEventListener('click', function () {
+					navigator.clipboard.writeText(password).then(function () {
+						copyIcon.style.display = 'none';
+						checkIcon.style.display = '';
+						copyBtn.setAttribute('aria-label', passwordGeneratorL10n.copied);
+
+						setTimeout(function () {
+							checkIcon.style.display = 'none';
+							copyIcon.style.display = '';
+							copyBtn.setAttribute('aria-label', passwordGeneratorL10n.copy);
+						}, 2000);
+					}).catch(function () {
+						copyIcon.textContent = '✗';
+						setTimeout(function () {
+							copyIcon.textContent = '📋';
+						}, 2000);
+					});
+				});
+
+				var li = createElement('li', { className: 'password-item' });
+				li.appendChild(createElement('span', { className: 'password-text' }, password));
+				li.appendChild(copyBtn);
+				list.appendChild(li);
 			});
+
+			resultsContainer.innerHTML = '';
+			resultsContainer.appendChild(list);
+		}
+
+		function createElement(tag, props, text) {
+			var el = document.createElement(tag);
+			if (props.className) el.className = props.className;
+			if (props.ariaLabel) el.setAttribute('aria-label', props.ariaLabel);
+			if (text !== undefined) el.textContent = text;
+			return el;
 		}
 	});
-}(jQuery));
+}());

@@ -3,7 +3,7 @@
  * Plugin Name: Strong Password Generator
  * Plugin URI:  https://lucidrhino.design
  * Description: Adds a shortcode that generates strong, memorable passwords
- * Version:     1.0.0
+ * Version:     1.0.1
  * Author:      Aidan Ashby
  * Author URI:  https://lucidrhino.design
  * Requires at least: 6.0
@@ -68,7 +68,13 @@ class Strong_Password_Generator {
 		if ( $words !== null ) return $words;
 
 		$path  = plugin_dir_path( __FILE__ ) . 'words.txt';
-		$lines = @file( $path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
+
+		if ( ! file_exists( $path ) ) {
+			wp_send_json_error( __( 'Word list unavailable.', 'strong-password-generator' ) );
+			exit;
+		}
+
+		$lines = file( $path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
 
 		if ( $lines === false || count( $lines ) < 10 ) {
 			wp_send_json_error( __( 'Word list unavailable.', 'strong-password-generator' ) );
@@ -88,8 +94,10 @@ class Strong_Password_Generator {
 		$count     = (int) $s['word_count'];
 
 		// Draw without replacement using CSPRNG
-		$indices = [];
+		$indices  = [];
+		$attempts = 0;
 		while ( count( $indices ) < $count ) {
+			if ( ++$attempts > 1000 ) break;
 			$idx = random_int( 0, $pool_size - 1 );
 			if ( ! in_array( $idx, $indices, true ) ) {
 				$indices[] = $idx;
@@ -208,8 +216,8 @@ class Strong_Password_Generator {
 		wp_enqueue_script(
 			'password-generator-js',
 			plugin_dir_url( __FILE__ ) . 'js/password-generator.js',
-			[ 'jquery' ],
-			'1.0.0',
+			[],
+			'1.0.1',
 			true
 		);
 		wp_enqueue_style(
@@ -502,7 +510,6 @@ if ( file_exists( $spg_puc_path ) ) {
 		'strong-password-generator'
 	);
 	$spg_checker->setBranch( 'main' );
-	$spg_checker->getVcsApi()->enableReleaseAssets();
 	// Remove the "Check for updates" action link — updates surface through the
 	// standard WP update system (plugins list and /wp-admin/update-core.php).
 	add_filter( 'puc_manual_check_link-strong-password-generator', '__return_empty_string' );
