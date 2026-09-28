@@ -3,7 +3,7 @@
  * Plugin Name: Strong Password Generator
  * Plugin URI:  https://lucidrhino.design
  * Description: Adds a shortcode that generates strong, memorable passwords
- * Version:     1.0.1
+ * Version:     1.0.2
  * Author:      Aidan Ashby
  * Author URI:  https://lucidrhino.design
  * Requires at least: 6.0
@@ -11,6 +11,7 @@
  * Requires PHP:      7.4
  * Text Domain:       strong-password-generator
  * License:           GPL-2.0-or-later
+ * Update URI:        https://github.com/aidanashby/strong-password-generator
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -217,14 +218,14 @@ class Strong_Password_Generator {
 			'password-generator-js',
 			plugin_dir_url( __FILE__ ) . 'js/password-generator.js',
 			[],
-			'1.0.1',
+			'1.0.2',
 			true
 		);
 		wp_enqueue_style(
 			'password-generator-css',
 			plugin_dir_url( __FILE__ ) . 'css/password-generator.css',
 			[],
-			'1.0.0'
+			'1.0.2'
 		);
 		wp_localize_script(
 			'password-generator-js',
@@ -501,7 +502,7 @@ class Strong_Password_Generator {
 new Strong_Password_Generator();
 
 // Auto-update via GitHub releases (Plugin Update Checker)
-$spg_puc_path = plugin_dir_path( __FILE__ ) . 'includes/plugin-update-checker/plugin-update-checker.php';
+$spg_puc_path = plugin_dir_path( __FILE__ ) . 'plugin-update-checker/plugin-update-checker.php';
 if ( file_exists( $spg_puc_path ) ) {
 	require_once $spg_puc_path;
 	$spg_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
@@ -509,7 +510,7 @@ if ( file_exists( $spg_puc_path ) ) {
 		__FILE__,
 		'strong-password-generator'
 	);
-	$spg_checker->setBranch( 'main' );
+	$spg_checker->getVcsApi()->enableReleaseAssets();
 	// Remove the "Check for updates" action link — updates surface through the
 	// standard WP update system (plugins list and /wp-admin/update-core.php).
 	add_filter( 'puc_manual_check_link-strong-password-generator', '__return_empty_string' );
