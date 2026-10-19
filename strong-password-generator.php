@@ -3,7 +3,7 @@
  * Plugin Name: Strong Password Generator
  * Plugin URI:  https://lucidrhino.design
  * Description: Adds a shortcode that generates strong, memorable passwords
- * Version:     1.0.2
+ * Version:     1.0.3
  * Author:      Aidan Ashby
  * Author URI:  https://lucidrhino.design
  * Requires at least: 6.0
@@ -188,7 +188,7 @@ class Strong_Password_Generator {
 	// -------------------------------------------------------------------------
 
 	public function generate_passwords_callback(): void {
-		check_ajax_referer( 'password_generator_nonce', 'nonce' );
+		// No nonce: the endpoint is public and takes no input, and cached pages would serve expired nonces.
 
 		$s         = $this->get_settings();
 		$count     = max( 1, min( 10, (int) $s['password_count'] ) );
@@ -218,21 +218,20 @@ class Strong_Password_Generator {
 			'password-generator-js',
 			plugin_dir_url( __FILE__ ) . 'js/password-generator.js',
 			[],
-			'1.0.2',
+			'1.0.3',
 			true
 		);
 		wp_enqueue_style(
 			'password-generator-css',
 			plugin_dir_url( __FILE__ ) . 'css/password-generator.css',
 			[],
-			'1.0.2'
+			'1.0.3'
 		);
 		wp_localize_script(
 			'password-generator-js',
 			'passwordGenerator',
 			[
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-				'nonce'   => wp_create_nonce( 'password_generator_nonce' ),
 			]
 		);
 		wp_localize_script(

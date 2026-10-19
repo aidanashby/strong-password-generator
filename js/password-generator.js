@@ -15,7 +15,6 @@
 
 			var body = new URLSearchParams();
 			body.append('action', 'generate_passwords');
-			body.append('nonce', passwordGenerator.nonce);
 
 			fetch(passwordGenerator.ajaxUrl, {
 				method:  'POST',

@@ -2,6 +2,14 @@
 
 All notable changes to Strong Password Generator.
 
+## [1.0.3] - 2026-10-19
+
+### Fixed
+- The generator no longer stops working for logged-out visitors when the page is cached. It used a security token that expired in cached copies of the page. The endpoint is public and takes no input, so it no longer uses the token.
+
+### Changed
+- The Plugin Check report is no longer included in the release zip.
+
 ## [1.0.2] - 2026-09-28
 
 ### Fixed
